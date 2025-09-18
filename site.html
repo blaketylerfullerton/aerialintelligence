@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Drone Stream Viewer</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #1a1a1a;
+        color: white;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .container {
+        max-width: 1200px;
+        width: 100%;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #4caf50;
+      }
+
+      .player-container {
+        background: #2d2d2d;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      }
+
+      video {
+        width: 100%;
+        height: auto;
+        border-radius: 5px;
+        background: #000;
+      }
+
+      .controls {
+        margin-top: 15px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        background: #4caf50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      button:hover {
+        background: #45a049;
+      }
+
+      button:disabled {
+        background: #666;
+        cursor: not-allowed;
+      }
+
+      input {
+        padding: 10px;
+        border: 1px solid #555;
+        border-radius: 5px;
+        background: #333;
+        color: white;
+        flex: 1;
+        min-width: 300px;
+      }
+
+      .status {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 5px;
+        text-align: center;
+      }
+
+      .status.connected {
+        background: rgba(76, 175, 80, 0.2);
+        border: 1px solid #4caf50;
+      }
+
+      .status.error {
+        background: rgba(244, 67, 54, 0.2);
+        border: 1px solid #f44336;
+      }
+
+      .info {
+        background: #2d2d2d;
+        border-radius: 5px;
+        padding: 15px;
+        margin-top: 20px;
+      }
+
+      .url-list {
+        list-style: none;
+        padding: 0;
+      }
+
+      .url-list li {
+        background: #333;
+        margin: 5px 0;
+        padding: 10px;
+        border-radius: 3px;
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🚁 Drone Stream Viewer</h1>
+
+      <div class="player-container">
+        <video id="videoPlayer" controls>
+          Your browser does not support the video tag.
+        </video>
+
+        <div class="controls">
+          <input
+            type="text"
+            id="streamUrl"
+            placeholder="Enter stream URL"
+            value="http://localhost:8000/live.flv"
+          />
+          <button onclick="loadStream()">Load Stream</button>
+          <button onclick="toggleFullscreen()">Fullscreen</button>
+          <button onclick="captureFrame()" style="background: #2196f3">
+            📸 Capture Frame
+          </button>
+          <button
+            onclick="toggleAutoCapture()"
+            id="autoCaptureBtn"
+            style="background: #ff9800"
+          >
+            🔄 Auto Capture OFF
+          </button>
+        </div>
+
+        <div id="status" class="status" style="display: none"></div>
+      </div>
+
+      <div class="info">
+        <h3>📸 Frame Capture:</h3>
+        <p>
+          • <strong>Manual:</strong> Click "📸 Capture Frame" to save current
+          frame
+        </p>
+        <p>
+          • <strong>Auto:</strong> Click "🔄 Auto Capture" to save frames every
+          5 seconds
+        </p>
+        <p>• Frames are saved as PNG files to your Downloads folder</p>
+
+        <h3>Common Stream URLs:</h3>
+        <ul class="url-list">
+          <li>HTTP-FLV: http://localhost:8000/live.flv</li>
+          <li>RTMP (VLC): rtmp://localhost:1935/live</li>
+        </ul>
+
+        <h3>Instructions:</h3>
+        <p>1. Make sure your RTMP server is running (node server.js)</p>
+        <p>
+          2. Your drone is currently streaming to: rtmp://192.168.1.70:1935/live
+        </p>
+        <p>3. Stream is active and working! ✅</p>
+        <p>4. Click "Load Stream" to start viewing</p>
+        <p>
+          <strong>Note:</strong> Stream URL automatically updated to match your
+          drone's configuration
+        </p>
+
+        <p>
+          <strong>Note:</strong> This player works best with HTTP-FLV streams.
+          For RTMP streams, use VLC Media Player.
+        </p>
+      </div>
+    </div>
+
+    <script>
+      const video = document.getElementById("videoPlayer");
+      const urlInput = document.getElementById("streamUrl");
+      const status = document.getElementById("status");
+
+      // Frame capture variables
+      let autoCaptureInterval = null;
+      let isAutoCapturing = false;
+      let frameCount = 0;
+
+      function showStatus(message, type) {
+        status.textContent = message;
+        status.className = `status ${type}`;
+        status.style.display = "block";
+      }
+
+      function loadStream() {
+        const url = urlInput.value.trim();
+        if (!url) {
+          showStatus("Please enter a stream URL", "error");
+          return;
+        }
+
+        showStatus("Loading stream...", "connected");
+
+        video.src = url;
+        video.load();
+
+        video.onloadstart = () => {
+          showStatus("Connecting to stream...", "connected");
+        };
+
+        video.oncanplay = () => {
+          showStatus("Stream loaded successfully!", "connected");
+          video.play().catch((e) => {
+            showStatus("Error playing stream: " + e.message, "error");
+          });
+        };
+
+        video.onerror = () => {
+          showStatus(
+            "Failed to load stream. Check if the stream is active.",
+            "error"
+          );
+        };
+      }
+
+      function toggleFullscreen() {
+        if (video.requestFullscreen) {
+          video.requestFullscreen();
+        } else if (video.webkitRequestFullscreen) {
+          video.webkitRequestFullscreen();
+        }
+      }
+
+      function captureFrame() {
+        if (video.videoWidth === 0 || video.videoHeight === 0) {
+          showStatus("No video stream to capture!", "error");
+          return;
+        }
+
+        // Create canvas element
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        // Set canvas size to match video
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        // Draw current video frame to canvas
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convert to blob and download
+        canvas.toBlob((blob) => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+          frameCount++;
+
+          a.href = url;
+          a.download = `drone-frame-${frameCount}-${timestamp}.png`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+
+          showStatus(`Frame ${frameCount} captured!`, "connected");
+        }, "image/png");
+      }
+
+      function toggleAutoCapture() {
+        const btn = document.getElementById("autoCaptureBtn");
+
+        if (isAutoCapturing) {
+          // Stop auto capture
+          clearInterval(autoCaptureInterval);
+          isAutoCapturing = false;
+          btn.textContent = "🔄 Auto Capture OFF";
+          btn.style.background = "#ff9800";
+          showStatus("Auto capture stopped", "connected");
+        } else {
+          // Start auto capture
+          if (video.videoWidth === 0 || video.videoHeight === 0) {
+            showStatus("Start video stream first!", "error");
+            return;
+          }
+
+          autoCaptureInterval = setInterval(captureFrame, 5000); // Every 5 seconds
+          isAutoCapturing = true;
+          btn.textContent = "🔄 Auto Capture ON";
+          btn.style.background = "#4caf50";
+          showStatus("Auto capture started (every 5 seconds)", "connected");
+
+          // Capture first frame immediately
+          captureFrame();
+        }
+      }
+
+      // Auto-load stream on page load
+      window.addEventListener("load", () => {
+        setTimeout(loadStream, 1000);
+      });
+    </script>
+  </body>
+</html>
