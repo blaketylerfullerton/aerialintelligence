@@ -1,0 +1,19 @@
+"""
+Configuration file for AI Image Classification
+Copy this file to config.py and add your API key
+"""
+
+# NVIDIA API Configuration
+# Get your API key from: https://build.nvidia.com/microsoft/florence-2
+API_KEY = "your-nvidia-api-key-here"
+NVAi_URL = "https://ai.api.nvidia.com/v1/vlm/microsoft/florence-2"
+
+# Asset Upload Configuration
+ASSET_UPLOAD_URL = "https://api.nvcf.nvidia.com/v2/nvcf/assets"
+
+# Request Timeouts (in seconds)
+UPLOAD_TIMEOUT = 30
+CLASSIFICATION_TIMEOUT = 300
+
+# Default Classification Task
+DEFAULT_TASK = "<CAPTION>"
