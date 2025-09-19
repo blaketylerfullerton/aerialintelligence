@@ -40,6 +40,11 @@ module.exports = {
     task: "<CAPTION>", // Default classification task
   },
 
+  // Notification Configuration
+  notifications: {
+    enabled: true, // Set to false to disable SMS notifications
+  },
+
   // Logging Configuration
   logging: {
     level: "info", // debug, info, warn, error

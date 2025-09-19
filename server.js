@@ -96,6 +96,9 @@ class ClassificationService {
             console.log(`   📝 Result: ${result.classification}`);
             console.log(`   💾 Saved to: ${path.basename(result.result_file)}`);
             SummaryLogger.saveResult(result);
+
+            // Send SMS notification with classification result
+            NotificationService.sendClassificationNotification(result);
           } else {
             console.log(
               `❌ Classification failed for ${result.image_file}: ${result.error}`
@@ -111,6 +114,67 @@ class ClassificationService {
       ) {
         console.log(`   🐍 ${line.trim()}`);
       }
+    });
+  }
+}
+
+/**
+ * Notification Service
+ */
+class NotificationService {
+  static sendClassificationNotification(result) {
+    if (!config.notifications?.enabled) {
+      console.log("📱 Notifications disabled in config");
+      return;
+    }
+
+    console.log(`📱 Sending SMS notification with image for classification...`);
+
+    const caption = `\n📝 Classification: ${
+      result.classification
+    }\n⏰ Time: ${new Date().toLocaleString()}`;
+
+    // Get the full image path from the captured frames directory
+    const imagePath = path.join(captureDir, path.basename(result.image_file));
+
+    const smsScriptPath = path.join(__dirname, "sms.py");
+
+    // Run the SMS Python script with the message and image path as arguments
+    const python = spawn("python", [
+      smsScriptPath,
+      "--image",
+      imagePath,
+      "--message",
+      caption,
+    ]);
+
+    let output = "";
+    let errorOutput = "";
+
+    python.stdout.on("data", (data) => {
+      output += data.toString();
+    });
+
+    python.stderr.on("data", (data) => {
+      errorOutput += data.toString();
+    });
+
+    python.on("close", (code) => {
+      if (code === 0) {
+        console.log(`✅ SMS notification sent successfully`);
+        if (config.logging.level === "debug" && output) {
+          console.log(`SMS output: ${output.trim()}`);
+        }
+      } else {
+        console.log(`❌ SMS notification failed with code ${code}`);
+        if (errorOutput) {
+          console.log(`SMS error: ${errorOutput.trim()}`);
+        }
+      }
+    });
+
+    python.on("error", (error) => {
+      console.log(`❌ Failed to start SMS process: ${error.message}`);
     });
   }
 }
@@ -431,6 +495,11 @@ function startServer() {
       config.classification.enabled ? "Enabled" : "Disabled"
     }`
   );
+  console.log(
+    `📱 SMS Notifications: ${
+      config.notifications?.enabled ? "Enabled" : "Disabled"
+    }`
+  );
   console.log(`📁 Frame Directory: ${captureDir}`);
   console.log(`📁 Classification Directory: ${classificationDir}`);
   console.log("");
@@ -454,6 +523,11 @@ function startServer() {
   console.log(
     "📈 Summary log: classification_results/classification_summary.jsonl"
   );
+  if (config.notifications?.enabled) {
+    console.log(
+      "📱 SMS notifications will be sent to Telegram for each classification!"
+    );
+  }
   console.log("Press Ctrl+C to stop the server");
 }
 
