@@ -53,13 +53,13 @@ let ASSET_UPLOAD_URL: string;
 
 try {
   // Try to load from config file
-  const config = require("./config.js");
+  const config = require("../config/config.js");
   API_KEY = config.nvidia.apiKey;
   NVAi_URL = config.nvidia.apiUrl;
   ASSET_UPLOAD_URL = config.nvidia.assetUploadUrl;
 } catch (error) {
   console.error(
-    "Failed to load config.js:",
+    "Failed to load config/config.js:",
     error instanceof Error ? error.message : String(error)
   );
   // Fallback to environment variables
@@ -70,7 +70,7 @@ try {
 
 if (!API_KEY) {
   throw new Error(
-    "API_KEY must be set in config.js or as NVIDIA_API_KEY environment variable"
+    "API_KEY must be set in config/config.js or as NVIDIA_API_KEY environment variable"
   );
 }
 

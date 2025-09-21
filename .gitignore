@@ -1,9 +1,10 @@
 # Configuration files with API keys
-config.py
-config.js
+config/config.py
+config/config.js
 
-classfication_results/
-captured_frames/
+# Data directories
+data/
+package-lock.json
 
 # Environment files
 .env
@@ -13,9 +14,7 @@ captured_frames/
 # Node modules
 node_modules/
 
-# Captured frames and classification results
-captured_frames/
-classification_results/
+# Data files are now in data/ directory (covered above)
 
 # Logs
 *.log

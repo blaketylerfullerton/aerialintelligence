@@ -9,7 +9,7 @@ import {
 } from "./imageClassifier";
 import { TelegramNotifier } from "./telegramNotifier";
 
-const config = require("./config");
+const config = require("../config/config");
 
 // Initialize server
 const nms = new NodeMediaServer(config.server);

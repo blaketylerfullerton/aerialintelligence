@@ -2,7 +2,7 @@ const NodeMediaServer = require("node-media-server");
 const fs = require("fs");
 const path = require("path");
 const { spawn } = require("child_process");
-const config = require("./config");
+const config = require("../config/config");
 
 // Initialize server
 const nms = new NodeMediaServer(config.server);

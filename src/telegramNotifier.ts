@@ -22,12 +22,24 @@ interface NotificationOptions {
 }
 
 // Configuration
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+let BOT_TOKEN = "";
+let CHAT_ID = "";
+let notificationsEnabled = true;
 
-if (!BOT_TOKEN || !CHAT_ID) {
+// Load config
+try {
+  const config = require("../config/config.js");
+  BOT_TOKEN = config.notifications?.botToken || "";
+  CHAT_ID = config.notifications?.chatId || "";
+  notificationsEnabled = config.notifications?.enabled !== false;
+} catch (error) {
+  console.warn("Could not load config file, assuming notifications enabled");
+}
+
+// Only throw error if notifications are enabled and tokens are missing
+if (notificationsEnabled && (!BOT_TOKEN || !CHAT_ID)) {
   throw new Error(
-    "TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID environment variables must be set"
+    "TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID environment variables must be set when notifications are enabled"
   );
 }
 
@@ -36,8 +48,8 @@ export class TelegramNotifier {
   private chatId: string;
 
   constructor(botToken?: string, chatId?: string) {
-    this.botToken = botToken || BOT_TOKEN!;
-    this.chatId = chatId || CHAT_ID!;
+    this.botToken = botToken || BOT_TOKEN || "";
+    this.chatId = chatId || CHAT_ID || "";
   }
 
   /**

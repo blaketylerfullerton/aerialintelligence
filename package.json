@@ -4,13 +4,13 @@
   "description": "A simple RTMP server for receiving live streams with AI classification",
   "main": "server.js",
   "scripts": {
-    "start": "ts-node server.ts",
-    "start:js": "node server.js",
-    "dev": "nodemon --ignore captured_frames/ --ignore classification_results/ --exec ts-node server.ts",
-    "dev:js": "nodemon server.js",
+    "start": "ts-node src/server.ts",
+    "start:js": "node src/server.js",
+    "dev": "nodemon --ignore data/ --exec ts-node src/server.ts",
+    "dev:js": "nodemon src/server.js",
     "build": "tsc",
-    "classify": "ts-node imageClassifier.ts",
-    "notify": "ts-node telegramNotifier.ts"
+    "classify": "ts-node src/imageClassifier.ts",
+    "notify": "ts-node src/telegramNotifier.ts"
   },
   "dependencies": {
     "node-media-server": "^2.6.0",
