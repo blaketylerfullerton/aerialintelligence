@@ -119,6 +119,39 @@ class ClassificationService {
 }
 
 /**
+ * Classification Filter Service
+ */
+class ClassificationFilter {
+  static shouldTriggerNotification(classificationText) {
+    if (!config.notifications?.triggers?.enabled) {
+      return true; // Send notification for all classifications if triggers disabled
+    }
+
+    const keywords = config.notifications.triggers.keywords || [];
+    if (keywords.length === 0) {
+      return true; // No keywords configured, send all notifications
+    }
+
+    const text = classificationText.toLowerCase();
+    const requireAll = config.notifications.triggers.requireAll || false;
+
+    if (requireAll) {
+      // ALL keywords must be present
+      return keywords.every((keyword) => text.includes(keyword.toLowerCase()));
+    } else {
+      // ANY keyword triggers notification
+      return keywords.some((keyword) => text.includes(keyword.toLowerCase()));
+    }
+  }
+
+  static getMatchedKeywords(classificationText) {
+    const keywords = config.notifications.triggers.keywords || [];
+    const text = classificationText.toLowerCase();
+    return keywords.filter((keyword) => text.includes(keyword.toLowerCase()));
+  }
+}
+
+/**
  * Notification Service
  */
 class NotificationService {
@@ -128,7 +161,40 @@ class NotificationService {
       return;
     }
 
-    console.log(`📱 Sending SMS notification with image for classification...`);
+    // Check if classification matches trigger criteria
+    if (
+      !ClassificationFilter.shouldTriggerNotification(result.classification)
+    ) {
+      console.log(
+        `📱 Classification doesn't match trigger keywords - skipping SMS notification`
+      );
+      if (config.logging.level === "debug") {
+        const matchedKeywords = ClassificationFilter.getMatchedKeywords(
+          result.classification
+        );
+        console.log(`   📝 Classification: ${result.classification}`);
+        console.log(
+          `   🔍 Matched keywords: ${
+            matchedKeywords.length > 0 ? matchedKeywords.join(", ") : "none"
+          }`
+        );
+        console.log(
+          `   🎯 Required keywords: ${config.notifications.triggers.keywords.join(
+            ", "
+          )}`
+        );
+      }
+      return;
+    }
+
+    const matchedKeywords = ClassificationFilter.getMatchedKeywords(
+      result.classification
+    );
+    console.log(
+      `📱 Sending SMS notification - trigger keywords matched: ${matchedKeywords.join(
+        ", "
+      )}`
+    );
 
     const caption = `\n📝 Classification: ${
       result.classification
@@ -500,6 +566,21 @@ function startServer() {
       config.notifications?.enabled ? "Enabled" : "Disabled"
     }`
   );
+  if (
+    config.notifications?.enabled &&
+    config.notifications?.triggers?.enabled
+  ) {
+    const keywords = config.notifications.triggers.keywords || [];
+    console.log(
+      `🎯 SMS Triggers: ${
+        keywords.length > 0 ? keywords.join(", ") : "None configured"
+      } (${
+        config.notifications.triggers.requireAll
+          ? "ALL required"
+          : "ANY matches"
+      })`
+    );
+  }
   console.log(`📁 Frame Directory: ${captureDir}`);
   console.log(`📁 Classification Directory: ${classificationDir}`);
   console.log("");
@@ -524,9 +605,18 @@ function startServer() {
     "📈 Summary log: classification_results/classification_summary.jsonl"
   );
   if (config.notifications?.enabled) {
-    console.log(
-      "📱 SMS notifications will be sent to Telegram for each classification!"
-    );
+    if (
+      config.notifications?.triggers?.enabled &&
+      config.notifications.triggers.keywords?.length > 0
+    ) {
+      console.log(
+        "📱 SMS notifications will be sent to Telegram when trigger keywords are detected!"
+      );
+    } else {
+      console.log(
+        "📱 SMS notifications will be sent to Telegram for each classification!"
+      );
+    }
   }
   console.log("Press Ctrl+C to stop the server");
 }

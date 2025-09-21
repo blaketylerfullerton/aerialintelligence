@@ -1,6 +1,9 @@
 # Configuration files with API keys
 config.py
 
+
+classfication_results/
+
 # Environment files
 .env
 .env.local

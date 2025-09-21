@@ -43,6 +43,14 @@ module.exports = {
   // Notification Configuration
   notifications: {
     enabled: true, // Set to false to disable SMS notifications
+
+    // SMS Trigger Configuration
+    triggers: {
+      enabled: true, // Set to false to send SMS for ALL classifications
+      keywords: ["beer", "Beer"],
+      // If true, requires ALL keywords to be present. If false, ANY keyword triggers SMS
+      requireAll: false,
+    },
   },
 
   // Logging Configuration
