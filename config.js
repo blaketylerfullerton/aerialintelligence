@@ -40,6 +40,16 @@ module.exports = {
     task: "<CAPTION>", // Default classification task
   },
 
+  // NVIDIA AI API Configuration
+  nvidia: {
+    apiKey:
+      "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",
+    apiUrl: "https://ai.api.nvidia.com/v1/vlm/microsoft/florence-2",
+    assetUploadUrl: "https://api.nvcf.nvidia.com/v2/nvcf/assets",
+    uploadTimeoutSeconds: 30,
+    classificationTimeoutSeconds: 300,
+  },
+
   // Notification Configuration
   notifications: {
     enabled: true, // Set to false to disable SMS notifications
@@ -47,7 +57,7 @@ module.exports = {
     // SMS Trigger Configuration
     triggers: {
       enabled: true, // Set to false to send SMS for ALL classifications
-      keywords: ["beer", "Beer"],
+      keywords: ["beer", "Beer", "book", "Book"],
       // If true, requires ALL keywords to be present. If false, ANY keyword triggers SMS
       requireAll: false,
     },

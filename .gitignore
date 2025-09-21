@@ -3,6 +3,7 @@ config.py
 
 
 classfication_results/
+captured_frames/
 
 # Environment files
 .env

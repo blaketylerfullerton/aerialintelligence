@@ -1,199 +1,248 @@
-# RTMP Server with AI Classification
+# RTMP Server with AI Classification (TypeScript)
 
-A Node.js RTMP server that automatically captures frames from live streams and classifies them using NVIDIA's Florence-2 AI model.
+A real-time RTMP streaming server with AI-powered image classification and Telegram notifications, now fully converted to TypeScript.
 
-## Features
+## 🚀 Features
 
-- **RTMP Streaming Server**: Accepts live video streams on port 1935
-- **HTTP Server**: Serves streams via HTTP-FLV on port 8000
-- **Automatic Frame Capture**: Captures frames from active streams at configurable intervals
-- **AI Classification**: Uses NVIDIA's Florence-2 model to classify captured frames
-- **Configurable Settings**: Easy configuration via `config.js`
+- **RTMP Streaming**: Receive live video streams
+- **AI Classification**: Automatically classify captured frames using NVIDIA's Florence-2 model
+- **Telegram Notifications**: Send classification results with images to Telegram
+- **Real-time Processing**: Capture frames at configurable intervals during streaming
+- **Type Safety**: Full TypeScript implementation with proper error handling
 - **File Management**: Automatic cleanup of old frames and classification results
-- **Graceful Shutdown**: Properly handles server shutdown and resource cleanup
+- **Configurable Triggers**: Send notifications only when specific keywords are detected
 
-## Project Structure
+## 📋 Prerequisites
 
-```
-├── server.js              # Main RTMP server with organized class structure
-├── image_classifier.py    # Python script for AI image classification
-├── config.js             # JavaScript configuration file
-├── config.py             # Python configuration file (contains API keys)
-├── captured_frames/      # Directory for captured video frames
-├── classification_results/ # Directory for AI classification results
-└── site.html             # Web viewer for streams (if exists)
-```
+- Node.js (v16 or higher)
+- FFmpeg (for frame capture)
+- NVIDIA API key (for AI classification)
+- Telegram Bot Token and Chat ID (for notifications)
 
-## Setup
+## 🛠️ Installation
 
-### Prerequisites
-
-- Node.js (v12 or higher)
-- Python 3.7+
-- FFmpeg installed and available in PATH
-- NVIDIA API key for Florence-2 model
-
-### Installation
-
-1. **Install Node.js dependencies:**
+1. **Install dependencies**:
 
    ```bash
-   npm install node-media-server
+   npm install
    ```
 
-2. **Install Python dependencies:**
+2. **Set up environment variables**:
 
    ```bash
-   pip install requests
+   # For Telegram notifications
+   export TELEGRAM_BOT_TOKEN="your_bot_token_here"
+   export TELEGRAM_CHAT_ID="your_chat_id_here"
+
+   # Alternative: Set NVIDIA API key as environment variable
+   export NVIDIA_API_KEY="your_nvidia_api_key_here"
    ```
 
-3. **Configure API Key:**
+3. **Create config.js** (if not exists):
 
-   Edit `config.py` and add your NVIDIA API key:
+   ```javascript
+   module.exports = {
+     // NVIDIA API Configuration
+     API_KEY: "your_nvidia_api_key_here",
+     NVAi_URL: "https://ai.api.nvidia.com/v1/vlm/microsoft/florence-2",
 
-   ```python
-   API_KEY = "your-nvidia-api-key-here"
+     // Server configuration
+     server: {
+       rtmp: {
+         port: 1935,
+         chunk_size: 60000,
+         gop_cache: true,
+         ping: 30,
+         ping_timeout: 60,
+       },
+       http: { port: 8000, allow_origin: "*" },
+     },
+
+     // Path configuration
+     paths: {
+       capturedFrames: "captured_frames",
+       classificationResults: "classification_results",
+     },
+
+     // Frame capture settings
+     frameCapture: {
+       captureIntervalMs: 10000, // Capture every 10 seconds
+       initialDelayMs: 3000, // Wait 3 seconds before first capture
+       quality: 2, // FFmpeg quality setting
+     },
+
+     // Classification settings
+     classification: {
+       enabled: true,
+       task: "<CAPTION>", // or "<DETAILED_CAPTION>", "<MORE_DETAILED_CAPTION>"
+       processDelayMs: 1000, // Wait 1 second before processing captured frame
+     },
+
+     // Notification settings
+     notifications: {
+       enabled: true,
+       triggers: {
+         enabled: true, // Enable keyword filtering
+         keywords: ["person", "vehicle", "motion"], // Keywords to trigger notifications
+         requireAll: false, // true = ALL keywords required, false = ANY keyword triggers
+       },
+     },
+
+     // File cleanup settings
+     cleanup: {
+       enabled: true,
+       maxFiles: 100, // Keep last 100 files
+       intervalMs: 300000, // Clean up every 5 minutes
+     },
+
+     // Logging settings
+     logging: {
+       level: "info", // "debug" for verbose output
+       showFFmpegOutput: false,
+     },
+   };
    ```
 
-   Alternatively, set the environment variable:
+## 🚀 Usage
 
-   ```bash
-   export NVIDIA_API_KEY="your-nvidia-api-key-here"
-   ```
+### Start the Server
 
-## Configuration
-
-Edit `config.js` to customize server behavior:
-
-```javascript
-module.exports = {
-  server: {
-    rtmp: { port: 1935 },
-    http: { port: 8000 },
-  },
-  frameCapture: {
-    captureIntervalMs: 10000, // Capture every 10 seconds
-    initialDelayMs: 3000, // Wait 3 seconds before first capture
-    quality: 2, // FFmpeg quality (1-31, lower is better)
-  },
-  classification: {
-    enabled: true, // Enable/disable AI classification
-    task: "<CAPTION>", // Classification task type
-  },
-  cleanup: {
-    enabled: true,
-    maxFiles: 100, // Keep last 100 files
-  },
-};
-```
-
-## Usage
-
-### Starting the Server
+**TypeScript version (recommended)**:
 
 ```bash
-node server.js
+npm start
+# or for development with auto-restart
+npm run dev
+```
+
+**JavaScript version (legacy)**:
+
+```bash
+npm run start:js
+# or for development
+npm run dev:js
 ```
 
 ### Streaming to the Server
 
-Use any RTMP-compatible streaming software (OBS, ffmpeg, etc.):
+1. **Stream URL**: `rtmp://localhost:1935/live`
+2. **Stream Key**: Any key you choose (e.g., "drone", "webcam", "security")
 
-- **Stream URL**: `rtmp://localhost:1935/live`
-- **Stream Key**: Any key you choose (e.g., "drone", "camera1")
+Example with OBS Studio:
 
-Example with ffmpeg:
+- Server: `rtmp://localhost:1935/live`
+- Stream Key: `drone`
+
+Example with FFmpeg:
 
 ```bash
 ffmpeg -i input.mp4 -c copy -f flv rtmp://localhost:1935/live/drone
 ```
 
-### Viewing Streams
+### Viewing the Stream
 
-- **RTMP**: `rtmp://localhost:1935/live/YOUR_KEY`
-- **HTTP-FLV**: `http://localhost:8000/live/YOUR_KEY.flv`
-- **Web Viewer**: Open `site.html` in your browser (if available)
+- **RTMP**: `rtmp://localhost:1935/live/drone`
+- **HTTP-FLV**: `http://localhost:8000/live/drone.flv`
 
-## AI Classification
+## 🤖 AI Classification
 
 The system automatically:
 
-1. **Captures frames** from active streams at configured intervals
-2. **Uploads frames** to NVIDIA's API service
-3. **Classifies images** using the Florence-2 model
-4. **Saves results** as JSON files in `classification_results/`
-5. **Logs summary** to `classification_summary.jsonl`
+1. Captures frames from live streams at configured intervals
+2. Sends frames to NVIDIA's Florence-2 model for classification
+3. Saves results to JSON files in `classification_results/`
+4. Sends Telegram notifications based on configured triggers
 
-### Classification Output
+### Classification Tasks
 
-Each classification creates:
+Configure the `classification.task` in config.js:
 
-- Individual JSON file: `frame-X-timestamp_classification.json`
-- Summary log entry in: `classification_summary.jsonl`
+- `<CAPTION>`: Simple caption
+- `<DETAILED_CAPTION>`: More detailed description
+- `<MORE_DETAILED_CAPTION>`: Very detailed description
 
-Example classification result:
+## 📱 Telegram Notifications
 
-```json
-{
-  "timestamp": "2024-01-01T12:00:00.000Z",
-  "image_file": "frame-1-2024-01-01T12-00-00-000Z.jpg",
-  "classification": "A person standing in front of a building",
-  "processed_at": "2024-01-01T12:00:05.000Z"
+### Setup Bot
+
+1. Create a Telegram bot via [@BotFather](https://t.me/botfather)
+2. Get your chat ID by messaging [@userinfobot](https://t.me/userinfobot)
+3. Set environment variables or update config
+
+### Keyword Triggers
+
+Configure notification triggers in config.js:
+
+- `enabled: true` - Enable keyword filtering
+- `keywords: []` - Array of trigger keywords
+- `requireAll: false` - Trigger behavior:
+  - `false`: ANY keyword triggers notification
+  - `true`: ALL keywords must be present
+
+## 🔧 TypeScript Development
+
+### Build TypeScript
+
+```bash
+npm run build
+```
+
+### Run Individual Modules
+
+```bash
+# Test image classification
+npm run classify -- /path/to/image.jpg ./output_dir --task "<CAPTION>" --debug
+
+# Test Telegram notification
+npm run notify -- --image /path/to/image.jpg --message "Test notification"
+```
+
+### Project Structure
+
+```
+├── server.ts              # Main RTMP server (TypeScript)
+├── imageClassifier.ts     # AI classification service
+├── telegramNotifier.ts    # Telegram notification service
+├── server.js              # Legacy JavaScript server
+├── config.js              # Configuration file
+├── package.json           # Dependencies and scripts
+├── tsconfig.json          # TypeScript configuration
+└── README.md              # This file
+```
+
+## 📊 Output Files
+
+- **Frames**: `captured_frames/frame-{count}-{timestamp}.jpg`
+- **Classifications**: `classification_results/frame-{count}-{timestamp}_classification.json`
+- **Summary Log**: `classification_results/classification_summary.jsonl`
+
+## 🔍 Debugging
+
+Enable debug mode in config.js:
+
+```javascript
+logging: {
+  level: "debug",
+  showFFmpegOutput: true
 }
 ```
 
-## File Management
+Or run individual modules with debug:
 
-The system automatically manages disk space by:
+```bash
+npm run classify -- /path/to/image.jpg ./output --debug
+```
 
-- Keeping only the most recent 100 frames (configurable)
-- Keeping only the most recent 100 classification results
-- Running cleanup every hour
-- Deleting files based on modification time
+## 🚨 Migration from Python
 
-## Services Architecture
+The TypeScript version replaces the Python scripts:
 
-The cleaned-up code is organized into service classes:
+- ✅ `image_classifier.py` → `imageClassifier.ts`
+- ✅ `sms.py` → `telegramNotifier.ts`
+- ✅ No more Python subprocess spawning
+- ✅ Better error handling and type safety
+- ✅ Native async/await support
 
-- **ClassificationService**: Handles AI image classification
-- **FrameCaptureService**: Manages video frame capture from streams
-- **StreamManagementService**: Manages stream lifecycle and frame capture intervals
-- **FileCleanupService**: Handles automatic file cleanup
-- **SummaryLogger**: Manages classification result logging
-- **EventHandlers**: Handles RTMP server events
+## 📝 License
 
-## Error Handling
-
-The system includes comprehensive error handling:
-
-- Failed frame captures are logged but don't stop the server
-- Classification errors are logged with details
-- File operation errors are handled gracefully
-- Server shutdown is handled cleanly with resource cleanup
-
-## Security Notes
-
-⚠️ **Important**:
-
-- Never commit `config.py` with real API keys to version control
-- The `.gitignore` file excludes sensitive configuration files
-- Consider using environment variables for API keys in production
-
-## Troubleshooting
-
-### Common Issues
-
-1. **FFmpeg not found**: Ensure FFmpeg is installed and in your PATH
-2. **Python not found**: The server tries `python3` first, then `python`
-3. **Classification failures**: Check your NVIDIA API key and network connection
-4. **Stream not appearing**: Verify your streaming software is using the correct URL and key
-
-### Logs
-
-- Server events are logged to console
-- Set `logging.level: "debug"` in config.js for verbose output
-- Classification results include error details when failures occur
-
-## License
-
-This project is for educational and development purposes. Ensure you comply with NVIDIA's API terms of service when using their classification services.
+MIT License
