@@ -1,6 +1,6 @@
 # Configuration files with API keys
 config.py
-
+config.js
 
 classfication_results/
 captured_frames/
