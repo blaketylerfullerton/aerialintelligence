@@ -7,7 +7,7 @@ import {
   saveClassificationResult,
   setDebugMode,
 } from "./imageClassifier";
-import { TelegramNotifier } from "./telegramNotifier";
+import { SafetyAlertNotifier } from "./telegramNotifier";
 
 const config = require("../config/config");
 
@@ -34,7 +34,7 @@ let frameCount = 0;
 
 // Initialize services
 const imageClassifier = new ImageClassifier();
-const telegramNotifier = new TelegramNotifier();
+const safetyAlertNotifier = new SafetyAlertNotifier();
 
 // Set debug mode based on config
 setDebugMode(config.logging.level === "debug");
@@ -52,9 +52,20 @@ class ClassificationService {
     console.log(`🤖 Starting classification for: ${path.basename(imagePath)}`);
 
     try {
+      // Use safety-focused prompting if enabled
+      const task = config.classification.safetyFocused
+        ? SafetyDetectionFilter.generateSafetyPrompt()
+        : config.classification.task;
+
+      console.log(
+        `🔍 Using ${
+          config.classification.safetyFocused ? "safety-focused" : "standard"
+        } analysis`
+      );
+
       const classification = await imageClassifier.classifyImage(
         imagePath,
-        config.classification.task
+        task
       );
 
       const resultPath = await saveClassificationResult(
@@ -76,8 +87,8 @@ class ClassificationService {
 
       SummaryLogger.saveResult(result);
 
-      // Send SMS notification with classification result
-      await NotificationService.sendClassificationNotification(result);
+      // Send safety alert if threats detected
+      await SafetyAlertService.sendSafetyAlert(result);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
@@ -99,109 +110,127 @@ class ClassificationService {
 }
 
 /**
- * Classification Filter Service
+ * Safety Detection and Alert Filter Service
  */
-class ClassificationFilter {
-  static shouldTriggerNotification(classificationText: string): boolean {
+class SafetyDetectionFilter {
+  static shouldTriggerAlert(classificationText: string): boolean {
     if (!config.notifications?.triggers?.enabled) {
-      return true; // Send notification for all classifications if triggers disabled
+      return true; // Send alert for all classifications if triggers disabled
     }
 
-    const keywords = config.notifications.triggers.keywords || [];
-    if (keywords.length === 0) {
-      return true; // No keywords configured, send all notifications
+    const dangerKeywords = config.notifications.triggers.keywords || [];
+    if (dangerKeywords.length === 0) {
+      return true; // No danger keywords configured, send all alerts
     }
 
     const text = classificationText.toLowerCase();
     const requireAll = config.notifications.triggers.requireAll || false;
 
     if (requireAll) {
-      // ALL keywords must be present
-      return keywords.every((keyword: string) =>
+      // ALL danger indicators must be present
+      return dangerKeywords.every((keyword: string) =>
         text.includes(keyword.toLowerCase())
       );
     } else {
-      // ANY keyword triggers notification
-      return keywords.some((keyword: string) =>
+      // ANY danger indicator triggers immediate alert
+      return dangerKeywords.some((keyword: string) =>
         text.includes(keyword.toLowerCase())
       );
     }
   }
 
-  static getMatchedKeywords(classificationText: string): string[] {
-    const keywords = config.notifications.triggers.keywords || [];
+  static getDetectedThreats(classificationText: string): string[] {
+    const dangerKeywords = config.notifications.triggers.keywords || [];
     const text = classificationText.toLowerCase();
-    return keywords.filter((keyword: string) =>
+    return dangerKeywords.filter((keyword: string) =>
       text.includes(keyword.toLowerCase())
     );
+  }
+
+  static assessThreatLevel(
+    detectedThreats: string[]
+  ): "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" {
+    if (detectedThreats.length === 0) return "LOW";
+
+    // Define critical threat keywords
+    const criticalThreats = [
+      "gun",
+      "weapon",
+      "fire",
+      "explosion",
+      "blood",
+      "emergency",
+    ];
+    const hasCriticalThreat = detectedThreats.some((threat) =>
+      criticalThreats.some((critical) =>
+        threat.toLowerCase().includes(critical)
+      )
+    );
+
+    if (hasCriticalThreat) return "CRITICAL";
+    if (detectedThreats.length >= 3) return "HIGH";
+    if (detectedThreats.length >= 2) return "MEDIUM";
+    return "LOW";
+  }
+
+  static generateSafetyPrompt(): string {
+    return "<DETAILED_CAPTION>Describe what you see with focus on safety hazards, weapons, fire, medical emergencies, suspicious activity, or dangerous situations";
   }
 }
 
 /**
- * Notification Service
+ * Safety Alert Service
  */
-class NotificationService {
-  static async sendClassificationNotification(result: any): Promise<void> {
+class SafetyAlertService {
+  static async sendSafetyAlert(result: any): Promise<void> {
     if (!config.notifications?.enabled) {
-      console.log("📱 Notifications disabled in config");
+      console.log("🚨 Safety alerts disabled in config");
       return;
     }
 
-    // Check if classification matches trigger criteria
-    if (
-      !ClassificationFilter.shouldTriggerNotification(result.classification)
-    ) {
+    // Check if classification indicates a safety threat
+    if (!SafetyDetectionFilter.shouldTriggerAlert(result.classification)) {
       console.log(
-        `📱 Classification doesn't match trigger keywords - skipping SMS notification`
+        `🔍 No safety threats detected - normal situation, no alert needed`
       );
       if (config.logging.level === "debug") {
-        const matchedKeywords = ClassificationFilter.getMatchedKeywords(
-          result.classification
-        );
         console.log(`   📝 Classification: ${result.classification}`);
-        console.log(
-          `   🔍 Matched keywords: ${
-            matchedKeywords.length > 0 ? matchedKeywords.join(", ") : "none"
-          }`
-        );
-        console.log(
-          `   🎯 Required keywords: ${config.notifications.triggers.keywords.join(
-            ", "
-          )}`
-        );
+        console.log(`   ✅ Status: Safe - monitoring continues`);
       }
       return;
     }
 
-    const matchedKeywords = ClassificationFilter.getMatchedKeywords(
+    const detectedThreats = SafetyDetectionFilter.getDetectedThreats(
       result.classification
     );
-    console.log(
-      `📱 Sending SMS notification - trigger keywords matched: ${matchedKeywords.join(
-        ", "
-      )}`
-    );
+    const threatLevel =
+      SafetyDetectionFilter.assessThreatLevel(detectedThreats);
 
-    const caption = `\n📝 Classification: ${
-      result.classification
-    }\n⏰ Time: ${new Date().toLocaleString()}`;
+    console.log(`🚨 SAFETY THREAT DETECTED - Level: ${threatLevel}`);
+    console.log(`⚠️ Threat indicators: ${detectedThreats.join(", ")}`);
 
     // Get the full image path from the captured frames directory
     const imagePath = path.join(captureDir, path.basename(result.image_file));
 
     try {
-      const success = await telegramNotifier.sendNotification({
+      const success = await safetyAlertNotifier.sendSafetyAlert({
         image: imagePath,
-        message: caption,
+        message: result.classification,
+        severity: threatLevel,
+        detectedThreats: detectedThreats,
+        timestamp: new Date().toLocaleString(),
+        location: "Security Camera Feed", // You can customize this
       });
 
       if (success) {
-        console.log(`✅ SMS notification sent successfully`);
+        console.log(
+          `✅ SAFETY ALERT sent successfully - ${threatLevel} priority`
+        );
       } else {
-        console.log(`❌ SMS notification failed`);
+        console.log(`❌ SAFETY ALERT failed to send`);
       }
     } catch (error) {
-      console.log(`❌ Failed to send SMS notification: ${error}`);
+      console.log(`❌ Failed to send safety alert: ${error}`);
     }
   }
 }
@@ -240,7 +269,7 @@ class FrameCaptureService {
 
     console.log(`📸 Capturing frame ${frameCount} from ${streamPath}...`);
 
-    const ffmpeg = spawn("ffmpeg", [
+    const ffmpegArgs = [
       "-i",
       `rtmp://localhost:1935${streamPath}`,
       "-vframes",
@@ -249,9 +278,19 @@ class FrameCaptureService {
       "image2",
       "-q:v",
       config.frameCapture.quality.toString(),
-      "-y", // Overwrite output file
-      outputPath,
-    ]);
+    ];
+
+    // Add resolution limits if configured
+    if (config.frameCapture.maxWidth && config.frameCapture.maxHeight) {
+      ffmpegArgs.push(
+        "-vf",
+        `scale='min(${config.frameCapture.maxWidth},iw)':'min(${config.frameCapture.maxHeight},ih)'`
+      );
+    }
+
+    ffmpegArgs.push("-y", outputPath); // Overwrite output file
+
+    const ffmpeg = spawn("ffmpeg", ffmpegArgs);
 
     ffmpeg.on("close", (code) => {
       this._handleCaptureResult(code, outputPath, filename);
@@ -513,7 +552,9 @@ function startServer(): void {
   nms.run();
 
   // Display startup information
-  console.log("🚀 RTMP Server with AI Classification started!");
+  console.log(
+    "🚀 SAFETY MONITORING SYSTEM - RTMP Server with AI Threat Detection started!"
+  );
   console.log(`📡 RTMP Port: ${config.server.rtmp.port}`);
   console.log(`🌐 HTTP Port: ${config.server.http.port}`);
   console.log(
@@ -522,28 +563,34 @@ function startServer(): void {
     }s intervals`
   );
   console.log(
-    `🤖 AI Classification: ${
-      config.classification.enabled ? "Enabled" : "Disabled"
+    `🔍 AI Safety Analysis: ${
+      config.classification.enabled ? "ACTIVE" : "DISABLED"
     }`
   );
   console.log(
-    `📱 SMS Notifications: ${
-      config.notifications?.enabled ? "Enabled" : "Disabled"
+    `🚨 Safety Alerts: ${
+      config.notifications?.enabled ? "ENABLED" : "DISABLED"
     }`
   );
   if (
     config.notifications?.enabled &&
     config.notifications?.triggers?.enabled
   ) {
-    const keywords = config.notifications.triggers.keywords || [];
+    const dangerKeywords = config.notifications.triggers.keywords || [];
     console.log(
-      `🎯 SMS Triggers: ${
-        keywords.length > 0 ? keywords.join(", ") : "None configured"
-      } (${
+      `⚠️ Threat Detection Keywords: ${
+        dangerKeywords.length > 0
+          ? dangerKeywords.slice(0, 5).join(", ") +
+            (dangerKeywords.length > 5 ? "..." : "")
+          : "None configured"
+      }`
+    );
+    console.log(
+      `🎯 Alert Trigger Mode: ${
         config.notifications.triggers.requireAll
-          ? "ALL required"
-          : "ANY matches"
-      })`
+          ? "ALL indicators required"
+          : "ANY threat triggers alert"
+      }`
     );
   }
   console.log(`📁 Frame Directory: ${captureDir}`);
@@ -561,13 +608,13 @@ function startServer(): void {
   console.log("  Web Viewer: Open site.html in your browser");
   console.log("");
   console.log(
-    "🤖 AI Classification will automatically process captured frames!"
+    "🔍 AI SAFETY MONITORING: Continuously analyzing video feed for threats!"
   );
   console.log(
-    "📊 Results saved to JSON files in classification_results directory"
+    "📊 Analysis results saved to JSON files in classification_results directory"
   );
   console.log(
-    "📈 Summary log: classification_results/classification_summary.jsonl"
+    "📈 Safety log: classification_results/classification_summary.jsonl"
   );
   if (config.notifications?.enabled) {
     if (
@@ -575,11 +622,11 @@ function startServer(): void {
       config.notifications.triggers.keywords?.length > 0
     ) {
       console.log(
-        "📱 SMS notifications will be sent to Telegram when trigger keywords are detected!"
+        "🚨 SAFETY ALERTS will be sent to Telegram when dangerous situations are detected!"
       );
     } else {
       console.log(
-        "📱 SMS notifications will be sent to Telegram for each classification!"
+        "🚨 SAFETY ALERTS will be sent to Telegram for all detected situations!"
       );
     }
   }

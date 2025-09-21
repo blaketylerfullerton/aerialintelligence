@@ -207,30 +207,9 @@ export class ImageClassifier {
         `DEBUG: Starting classification for ${imagePath} with task ${task}`
       );
 
-      // Try direct base64 approach first
-      try {
-        return await this.classifyImageDirect(imagePath, task);
-      } catch (directError) {
-        debugPrint(
-          `DEBUG: Direct method failed, trying asset upload: ${directError}`
-        );
-        // Fall back to asset upload method
-        const assetId = await this.uploadAsset(imagePath);
-        const content = `${task}<img src="data:image/jpeg;asset_id,${assetId}" />`;
-        const inputs = {
-          messages: [
-            {
-              role: "user",
-              content,
-            },
-          ],
-        };
-
-        debugPrint(
-          "DEBUG: Classification input prepared (asset upload method)"
-        );
-        return await this.sendClassificationRequest(inputs, assetId);
-      }
+      // Use direct base64 approach only (no cloud upload fallback)
+      debugPrint("DEBUG: Using direct base64 method only - no cloud uploads");
+      return await this.classifyImageDirect(imagePath, task);
     } catch (error) {
       debugPrint(`DEBUG: Classification exception: ${error}`);
       throw new Error(`Classification failed: ${error}`);
@@ -248,7 +227,21 @@ export class ImageClassifier {
 
     // Read and encode image as base64
     const imageBuffer = await fs.readFile(imagePath);
+    const fileSizeKB = Math.round(imageBuffer.length / 1024);
+    debugPrint(`DEBUG: Image file size: ${fileSizeKB}KB`);
+
+    // Check if image is too large (most APIs have limits around 20MB)
+    const maxSizeMB = 20;
+    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+    if (imageBuffer.length > maxSizeBytes) {
+      throw new Error(
+        `Image too large: ${fileSizeKB}KB (max: ${maxSizeMB}MB). Consider reducing frame capture quality.`
+      );
+    }
+
     const base64Image = imageBuffer.toString("base64");
+    const base64SizeKB = Math.round(base64Image.length / 1024);
+    debugPrint(`DEBUG: Base64 size: ${base64SizeKB}KB`);
 
     // Determine content type
     let contentType = lookup(imagePath) || "image/jpeg";
@@ -256,17 +249,23 @@ export class ImageClassifier {
       contentType = "image/jpeg";
     }
 
+    // Use simple string format for NVIDIA Florence-2 API
     const content = `${task}<img src="data:${contentType};base64,${base64Image}" />`;
     const inputs = {
       messages: [
         {
           role: "user",
-          content,
+          content: content,
         },
       ],
     };
 
     debugPrint("DEBUG: Classification input prepared (direct base64 method)");
+    debugPrint(
+      `DEBUG: Total payload size: ~${Math.round(
+        JSON.stringify(inputs).length / 1024
+      )}KB`
+    );
     return await this.sendClassificationRequest(inputs);
   }
 
@@ -302,8 +301,33 @@ export class ImageClassifier {
     if (!response.ok) {
       const errorText = await response.text();
       debugPrint(`DEBUG: Classification error response: ${errorText}`);
+
+      // Provide helpful error messages based on status code
+      let helpfulMessage = "";
+      switch (response.status) {
+        case 401:
+          helpfulMessage = " - Check your NVIDIA API key in config.js";
+          break;
+        case 403:
+          helpfulMessage =
+            " - API key may not have permission for this service";
+          break;
+        case 413:
+          helpfulMessage = " - Image too large, reduce frame capture quality";
+          break;
+        case 429:
+          helpfulMessage = " - Rate limit exceeded, slow down requests";
+          break;
+        case 501:
+          helpfulMessage = " - Service not implemented/available for your plan";
+          break;
+        case 503:
+          helpfulMessage = " - Service temporarily unavailable";
+          break;
+      }
+
       throw new Error(
-        `Classification request failed: ${response.status} ${response.statusText}. Response: ${errorText}`
+        `Classification request failed: ${response.status} ${response.statusText}${helpfulMessage}. Response: ${errorText}`
       );
     }
 
