@@ -10,7 +10,10 @@
     "dev:js": "nodemon src/server.js",
     "build": "tsc",
     "classify": "ts-node src/imageClassifier.ts",
-    "notify": "ts-node src/telegramNotifier.ts"
+    "notify": "ts-node src/telegramNotifier.ts",
+    "test-threat": "node test_threat_detection.js",
+    "simulate": "node simulate_security_footage.js",
+    "test-api": "node test_nvidia_api.js"
   },
   "dependencies": {
     "node-media-server": "^2.6.0",
