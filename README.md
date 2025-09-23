@@ -4,12 +4,12 @@ A real-time RTMP streaming server with advanced AI threat detection, powered by 
 
 ## 🛡️ AI Threat Detection Features
 
-- ** Real-time Security Monitoring**: Continuously analyzes video frames from RTMP streams
-- ** Dual-Layer AI Analysis**: Combines pattern matching with advanced AI contextual analysis
-- ** Multi-Level Threat Classification**: CRITICAL, HIGH, MEDIUM, LOW threat severity levels
-- ** Intelligent Notifications**: Automated Telegram alerts with threat summaries
-- ** Confidence Scoring**: Provides threat confidence percentages and recommended actions
-- ** Customizable Sensitivity**: Configurable threat detection thresholds
+- **Real-time Security Monitoring**: Continuously analyzes video frames from RTMP streams
+- **Dual-Layer AI Analysis**: Combines pattern matching with advanced AI contextual analysis
+- **Multi-Level Threat Classification**: CRITICAL, HIGH, MEDIUM, LOW threat severity levels
+- **Intelligent Notifications**: Automated Telegram alerts with threat summaries
+- **Confidence Scoring**: Provides threat confidence percentages and recommended actions
+- **Customizable Sensitivity**: Configurable threat detection thresholds
 
 ## 🧠 How AI Threat Detection Works
 
