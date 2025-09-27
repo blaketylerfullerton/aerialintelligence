@@ -1,6 +1,10 @@
-# Configuration files with API keys
+# Configuration files with API keys (NEVER commit these!)
 config/config.py
 config/config.js
+
+# Template files can be committed
+!config/*.template.js
+!config/*.template.py
 
 # Data directories
 data/
