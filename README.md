@@ -58,7 +58,7 @@ The system combines both analyses to provide accurate threat detection with mini
 └── .gitignore             # Git ignore rules
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 1. **Install dependencies**:
 
@@ -77,7 +77,7 @@ The system combines both analyses to provide accurate threat detection with mini
 
 4. **Stream to**: `rtmp://localhost:1935/live/{stream_key}`
 
-## 🚨 Threat Detection Configuration
+## Threat Detection Configuration
 
 ### Sensitivity Levels
 
@@ -93,11 +93,11 @@ threatDetection: {
 
 ### Threat Severity Scale
 
-- **5 - CRITICAL**: 🚨 Immediate danger (weapons, violence, break-ins)
-- **4 - HIGH**: ⚠️ Suspicious activity (unauthorized persons, climbing fences)
-- **3 - MEDIUM**: ⚡ Potential concern (loitering, unusual objects)
-- **2 - LOW**: 👁️ Minor anomaly (unexpected movement)
-- **1 - NONE**: ✅ Normal activity
+- **5 - CRITICAL**: Immediate danger (weapons, violence, break-ins)
+- **4 - HIGH**: Suspicious activity (unauthorized persons, climbing fences)
+- **3 - MEDIUM**: Potential concern (loitering, unusual objects)
+- **2 - LOW**: Minor anomaly (unexpected movement)
+- **1 - NONE**: Normal activity
 
 ### Example Threat Detection Output
 
@@ -175,7 +175,7 @@ Data directories are automatically created and managed by the application.
 - **Node.js 18+**: Runtime environment
 - **RTMP Source**: Video stream (security camera, OBS, etc.)
 
-## 🎯 Use Cases
+## Use Cases
 
 - **Security Surveillance**: Monitor restricted areas for unauthorized access
 - **Perimeter Protection**: Detect fence climbing, break-ins, and intrusions
