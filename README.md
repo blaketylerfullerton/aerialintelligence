@@ -2,7 +2,7 @@
 
 A real-time RTMP streaming server with advanced AI threat detection, powered by NVIDIA's Florence-2 model. The system monitors video streams, analyzes captured frames for security threats, and provides intelligent notifications with threat severity assessment.
 
-## 🛡️ AI Threat Detection Features
+## AI Threat Detection Features
 
 - **Real-time Security Monitoring**: Continuously analyzes video frames from RTMP streams
 - **Dual-Layer AI Analysis**: Combines pattern matching with advanced AI contextual analysis
@@ -11,7 +11,7 @@ A real-time RTMP streaming server with advanced AI threat detection, powered by 
 - **Confidence Scoring**: Provides threat confidence percentages and recommended actions
 - **Customizable Sensitivity**: Configurable threat detection thresholds
 
-## 🧠 How AI Threat Detection Works
+## How AI Threat Detection Works
 
 The system employs a sophisticated two-stage analysis approach:
 
@@ -115,11 +115,11 @@ threatDetection: {
 🎯 Action: 🔍 Investigate immediately
 ```
 
-## 📖 Full Documentation
+## Full Documentation
 
 See [docs/README.md](docs/README.md) for complete setup instructions, configuration options, and usage examples.
 
-## 🔐 Security Features
+## Security Features
 
 ### Real-time Monitoring
 
@@ -140,7 +140,7 @@ See [docs/README.md](docs/README.md) for complete setup instructions, configurat
 - **Confidence Scoring**: Provides reliability metrics for each threat assessment
 - **False Positive Reduction**: Advanced algorithms minimize unnecessary alerts
 
-## 🛠️ Development
+## Development
 
 - `npm run dev` - Start with auto-reload
 - `npm run build` - Compile TypeScript
@@ -149,7 +149,7 @@ See [docs/README.md](docs/README.md) for complete setup instructions, configurat
 - `npm run test-threat` - Test threat detection system
 - `npm run simulate` - Simulate security footage for testing
 
-## 🔧 Configuration
+## Configuration
 
 Key configuration files:
 
@@ -159,7 +159,7 @@ Key configuration files:
 
 Data directories are automatically created and managed by the application.
 
-## 🚀 Key Technologies
+## Technologies
 
 - **NVIDIA Florence-2**: Advanced vision-language model for image understanding
 - **Node Media Server**: High-performance RTMP streaming server
@@ -168,7 +168,7 @@ Data directories are automatically created and managed by the application.
 - **Pattern Recognition**: Advanced regex-based threat pattern matching
 - **AI Contextual Analysis**: Intelligent scene understanding and threat assessment
 
-## 📋 Requirements
+## Requirements
 
 - **NVIDIA API Key**: Required for Florence-2 image classification
 - **Telegram Bot Token**: For security alert notifications
