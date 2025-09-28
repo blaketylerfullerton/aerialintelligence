@@ -14,29 +14,6 @@ A real-time RTMP streaming server with advanced AI threat detection, powered by 
 
 ---
 
-### 🔍 Alert Interface Breakdown
-
-The safety alert interface showcases our comprehensive threat detection system:
-
-| Component                 | Feature            | Description                                                                  |
-| ------------------------- | ------------------ | ---------------------------------------------------------------------------- |
-| 🚨 **Priority Level**     | Critical Priority  | Immediate attention alerts with visual indicators                            |
-| ⏰ **Timestamp**          | Precise Timing     | Exact date/time for incident tracking and forensics                          |
-| 🔍 **Situation Analysis** | Detailed Caption   | AI-powered scene description with object and threat identification           |
-| ⚠️ **Threat Indicators**  | Smart Detection    | Automatic identification of weapons, suspicious behavior, and security risks |
-| 📱 **Mobile Interface**   | Real-time Alerts   | Push notifications delivered instantly to security personnel                 |
-| 🎯 **Action Required**    | Immediate Response | Clear guidance on required actions and escalation procedures                 |
-
-### 📊 Key Alert Features Demonstrated
-
-- **🎯 Precision Detection**: Identifies specific threats (weapon detection in this example)
-- **📍 Location Awareness**: Pinpoints exact location and context of the threat
-- **⚡ Real-time Processing**: Instant analysis and notification delivery
-- **📋 Comprehensive Logging**: Detailed incident reports for security review
-- **🔔 Multi-channel Alerts**: Supports various notification methods (mobile, Telegram, etc.)
-
----
-
 ## AI Threat Detection Features
 
 - **Real-time Security Monitoring**: Continuously analyzes video frames from RTMP streams
