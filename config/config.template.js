@@ -47,6 +47,13 @@ module.exports = {
     safetyFocused: false, // Set to true for safety-focused analysis
   },
 
+  // Threat Detection Configuration
+  threatDetection: {
+    notificationThreshold: 3, // MEDIUM and above (1-5 scale)
+    detailedAnalysis: true, // Enable AI contextual analysis
+    timeBasedAnalysis: true, // Consider time-of-day factors
+  },
+
   // Telegram Notifications Configuration
   notifications: {
     enabled: false, // Set to true to enable notifications
