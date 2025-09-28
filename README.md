@@ -4,7 +4,7 @@ A real-time RTMP streaming server with advanced AI threat detection, powered by 
 
 <div align="center">
 
-<img src="docs/message_image.jpg" alt="AI Safety Alert System Demo" width="30%">
+<img src="docs/message_image.jpg" alt="AI Safety Alert System Demo" width="40%">
 
 **Real-time AI threat detection in action** - Our system automatically identifies security threats and generates immediate safety alerts with detailed threat analysis, severity classification, and recommended actions.
 
