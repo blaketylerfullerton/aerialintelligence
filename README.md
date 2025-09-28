@@ -2,6 +2,41 @@
 
 A real-time RTMP streaming server with advanced AI threat detection, powered by NVIDIA's Florence-2 model. The system monitors video streams, analyzes captured frames for security threats, and provides intelligent notifications with threat severity assessment.
 
+## 🚨 Live Safety Alert Demo
+
+<div align="center">
+
+![AI Safety Alert System Demo](docs/message_image.jpg)
+
+**Real-time AI threat detection in action** - Our system automatically identifies security threats and generates immediate safety alerts with detailed threat analysis, severity classification, and recommended actions.
+
+</div>
+
+---
+
+### 🔍 Alert Interface Breakdown
+
+The safety alert interface showcases our comprehensive threat detection system:
+
+| Component                 | Feature            | Description                                                                  |
+| ------------------------- | ------------------ | ---------------------------------------------------------------------------- |
+| 🚨 **Priority Level**     | Critical Priority  | Immediate attention alerts with visual indicators                            |
+| ⏰ **Timestamp**          | Precise Timing     | Exact date/time for incident tracking and forensics                          |
+| 🔍 **Situation Analysis** | Detailed Caption   | AI-powered scene description with object and threat identification           |
+| ⚠️ **Threat Indicators**  | Smart Detection    | Automatic identification of weapons, suspicious behavior, and security risks |
+| 📱 **Mobile Interface**   | Real-time Alerts   | Push notifications delivered instantly to security personnel                 |
+| 🎯 **Action Required**    | Immediate Response | Clear guidance on required actions and escalation procedures                 |
+
+### 📊 Key Alert Features Demonstrated
+
+- **🎯 Precision Detection**: Identifies specific threats (weapon detection in this example)
+- **📍 Location Awareness**: Pinpoints exact location and context of the threat
+- **⚡ Real-time Processing**: Instant analysis and notification delivery
+- **📋 Comprehensive Logging**: Detailed incident reports for security review
+- **🔔 Multi-channel Alerts**: Supports various notification methods (mobile, Telegram, etc.)
+
+---
+
 ## AI Threat Detection Features
 
 - **Real-time Security Monitoring**: Continuously analyzes video frames from RTMP streams
@@ -99,21 +134,31 @@ threatDetection: {
 - **2 - LOW**: Minor anomaly (unexpected movement)
 - **1 - NONE**: Normal activity
 
-### Example Threat Detection Output
+### Example Alert Output (As Shown Above)
+
+Our system generates comprehensive safety alerts exactly like the one demonstrated in the image above:
 
 ```
-🚨 THREAT LEVEL: HIGH
-🎯 Confidence: 85%
-📊 Score: 4/5
-🎬 Source: frame_20250923_143022.jpg
-⏰ Time: 9/23/2025, 2:30:22 PM
-📝 Reasons:
-   • High threat pattern detected: suspicious activity
-   • AI threat assessment: HIGH
-   • AI confidence: 85%
-   • AI reasoning: Person in restricted area after hours
-🎯 Action: 🔍 Investigate immediately
+🚨 SAFETY ALERT - CRITICAL PRIORITY 🚨
+
+⏰ Time: 9/22/2025, 6:14:45 PM
+
+🔍 DETECTED SITUATION:
+In this image we can see a person standing on the floor and holding a
+gun in his hands. We can also see some chairs, plants, grass, a group
+of trees, a wall and some lights.
+
+⚠️ THREAT INDICATORS:
+• gun
+
+📱 This is an automated safety monitoring alert.
+🚨 IMMEDIATE ATTENTION REQUIRED 🚨
+
+🤖 AI drone
+📅 09/22/25
 ```
+
+**Real-world deployment ready** - This exact alert format is delivered via Telegram, mobile push notifications, and web dashboard interfaces.
 
 ## Full Documentation
 
