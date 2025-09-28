@@ -2,11 +2,9 @@
 
 A real-time RTMP streaming server with advanced AI threat detection, powered by NVIDIA's Florence-2 model. The system monitors video streams, analyzes captured frames for security threats, and provides intelligent notifications with threat severity assessment.
 
-## 🚨 Live Safety Alert Demo
-
 <div align="center">
 
-<img src="docs/message_image.jpg" alt="AI Safety Alert System Demo" width="50%">
+<img src="docs/message_image.jpg" alt="AI Safety Alert System Demo" width="30%">
 
 **Real-time AI threat detection in action** - Our system automatically identifies security threats and generates immediate safety alerts with detailed threat analysis, severity classification, and recommended actions.
 
