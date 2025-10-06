@@ -2,7 +2,7 @@
 
 A real-time RTMP streaming server with AI-powered image classification and Telegram notifications, now fully converted to TypeScript.
 
-## 🚀 Features
+## Features
 
 - **RTMP Streaming**: Receive live video streams
 - **AI Classification**: Automatically classify captured frames using NVIDIA's Florence-2 model
@@ -12,14 +12,14 @@ A real-time RTMP streaming server with AI-powered image classification and Teleg
 - **File Management**: Automatic cleanup of old frames and classification results
 - **Configurable Triggers**: Send notifications only when specific keywords are detected
 
-## 📋 Prerequisites
+##  Prerequisites
 
 - Node.js (v16 or higher)
 - FFmpeg (for frame capture)
 - NVIDIA API key (for AI classification)
 - Telegram Bot Token and Chat ID (for notifications)
 
-## 🛠️ Installation
+##  Installation
 
 1. **Install dependencies**:
 
@@ -103,7 +103,7 @@ A real-time RTMP streaming server with AI-powered image classification and Teleg
    };
    ```
 
-## 🚀 Usage
+##  Usage
 
 ### Start the Server
 
@@ -144,7 +144,7 @@ ffmpeg -i input.mp4 -c copy -f flv rtmp://localhost:1935/live/drone
 - **RTMP**: `rtmp://localhost:1935/live/drone`
 - **HTTP-FLV**: `http://localhost:8000/live/drone.flv`
 
-## 🤖 AI Classification
+##  AI Classification
 
 The system automatically:
 
@@ -233,16 +233,3 @@ Or run individual modules with debug:
 npm run classify -- /path/to/image.jpg ./output --debug
 ```
 
-## 🚨 Migration from Python
-
-The TypeScript version replaces the Python scripts:
-
-- ✅ `image_classifier.py` → `imageClassifier.ts`
-- ✅ `sms.py` → `telegramNotifier.ts`
-- ✅ No more Python subprocess spawning
-- ✅ Better error handling and type safety
-- ✅ Native async/await support
-
-## 📝 License
-
-MIT License
