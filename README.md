@@ -45,7 +45,7 @@ Advanced AI analysis using NVIDIA's Florence-2 model provides:
 
 The system combines both analyses to provide accurate threat detection with minimal false positives.
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 ├── src/                    # Source code
