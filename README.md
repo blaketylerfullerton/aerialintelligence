@@ -87,6 +87,11 @@ The system combines both analyses to provide accurate threat detection with mini
 
 4. **Stream to**: `rtmp://{your server device ip}:1935/live/{stream_key}`
 
+```
+To find your device ip:
+"ifconfig" for mac
+"ipconfig" for windows
+```
 ## Threat Detection Configuration
 
 ### Sensitivity Levels
