@@ -85,7 +85,7 @@ The system combines both analyses to provide accurate threat detection with mini
    npm run start:js   # JavaScript version
    ```
 
-4. **Stream to**: `rtmp://localhost:1935/live/{stream_key}`
+4. **Stream to**: `rtmp://{your server device ip}:1935/live/{stream_key}`
 
 ## Threat Detection Configuration
 
