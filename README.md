@@ -172,7 +172,6 @@ See [docs/README.md](docs/README.md) for complete setup instructions, configurat
 - `npm run classify` - Test AI classification
 - `npm run notify` - Test Telegram notifications
 - `npm run test-threat` - Test threat detection system
-- `npm run simulate` - Simulate security footage for testing
 
 ## Configuration
 
